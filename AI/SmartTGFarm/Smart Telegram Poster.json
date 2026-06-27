@@ -1,0 +1,1139 @@
+{
+  "name": "Smart Telegram Poster (Multi-Channel & Multi-Bot)",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 6
+            }
+          ]
+        }
+      },
+      "id": "28248b15-d969-4ac5-9694-fb53a38482d1",
+      "name": "Daily Trigger1",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -2112,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0",
+          "mode": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "pos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "pending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6ab18f99-a8a5-45fc-a6f1-fa99150fd016",
+      "name": "Get Pending Posts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        -1792,
+        496
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "olfC4XtKPvB22RKj",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "=={{ DateTime.fromISO($json[\"Publish At\"]).toMillis() }}",
+              "value2": "=={{ DateTime.now().toMillis() }}"
+            }
+          ]
+        }
+      },
+      "id": "33e3f7ad-ea61-48fa-a3c2-efadd6313161",
+      "name": "Time to Post?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1568,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Get Pending Posts').item.json['Channel ID'] }}",
+        "text": "={{ $('Get Pending Posts').item.json['Post Text'] }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "f331bf47-3c74-4afe-9636-f3e3edeb4551",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        496
+      ],
+      "webhookId": "c797ef48-05f6-4d91-820f-43b5949b9f87",
+      "credentials": {
+        "telegramApi": {
+          "id": "7qfqBURqTsPveCVA",
+          "name": "Telegram account 5"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "pos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "posted",
+            "Post Text": "={{ $('Time to Post?').item.json['Post Text'] }}"
+          },
+          "matchingColumns": [
+            "Post Text"
+          ],
+          "schema": [
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "HTML Text",
+              "displayName": "HTML Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Publish At",
+              "displayName": "Publish At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Channel ID",
+              "displayName": "Channel ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Bot Token",
+              "displayName": "Bot Token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Image URL",
+              "displayName": "Image URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Original X ID",
+              "displayName": "Original X ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Author",
+              "displayName": "Author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Image Prompt",
+              "displayName": "Image Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "toolCallId",
+              "displayName": "toolCallId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mapping": {
+            "Status": "posted"
+          }
+        },
+        "options": {}
+      },
+      "id": "1e797659-6b73-4bae-8db5-4a7726f6bb1d",
+      "name": "Mark as Posted",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        -1120,
+        480
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "olfC4XtKPvB22RKj",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0",
+          "mode": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1867223924,
+          "mode": "list",
+          "cachedResultName": "channels",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0/edit#gid=1867223924"
+        },
+        "options": {}
+      },
+      "id": "970acd16-5bf3-4dcf-9185-68aab5b58b3e",
+      "name": "Get Channels details",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        -1888,
+        192
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "olfC4XtKPvB22RKj",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1664,
+        192
+      ],
+      "id": "c911381c-77a6-490b-8e9c-586c4d0ed1c7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1216,
+        224
+      ],
+      "id": "6e0d1043-e35b-4c45-992c-2fe3a12efeb1",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "wAwJ2Mod1yTDAjh6",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "pos",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Post Text": "={{ $('Lil Search Orchestrator').item.json.output }}",
+            "Publish At": "={{ \n  DateTime.now().setZone('Europe/Moscow')\n    .set({ \n      hour: Number( ($('Loop Over Items').item.json.shedule || \"12:00\").split(':')[0] ), \n      minute: Number( ($('Loop Over Items').item.json.shedule || \"12:00\").split(':')[1] ) \n    })\n    .toISO()\n}}",
+            "Status": "=pending",
+            "Channel ID": "={{ $('Loop Over Items').item.json.chat_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Post Text",
+              "displayName": "Post Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "HTML Text",
+              "displayName": "HTML Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Publish At",
+              "displayName": "Publish At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Channel ID",
+              "displayName": "Channel ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Bot Token",
+              "displayName": "Bot Token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image URL",
+              "displayName": "Image URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Original X ID",
+              "displayName": "Original X ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Author",
+              "displayName": "Author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image Prompt",
+              "displayName": "Image Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "toolCallId",
+              "displayName": "toolCallId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -864,
+        192
+      ],
+      "id": "c550dc10-ee33-4176-8c55-3b5888b4b7b2",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleApi": {
+          "id": "olfC4XtKPvB22RKj",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cbdb06f5-65ff-4dee-a254-f63a30ba1d9d",
+              "name": "shedule",
+              "value": "={{ $('Loop Over Items').item.json.shedule }}",
+              "type": "string"
+            },
+            {
+              "id": "670f609a-8146-43db-8b03-99a02c213faf",
+              "name": "chat_id",
+              "value": "={{ $('Loop Over Items').item.json.chat_id }}",
+              "type": "string"
+            },
+            {
+              "id": "aaeb3091-fe69-431c-8ffe-8922dd2be9aa",
+              "name": "content",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "ccd7ecf5-a02f-4a63-be26-ce85af5226c7",
+              "name": "content_style",
+              "value": "={{ $json.content_style }}",
+              "type": "string"
+            },
+            {
+              "id": "32579ce7-fff4-4cb7-9a78-aba5814a6a8d",
+              "name": "username",
+              "value": "={{ $json.username }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1440,
+        80
+      ],
+      "id": "31bfe061-6ff2-4950-b394-6b819717bd97",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -2016,
+        496
+      ],
+      "id": "3d12394e-8383-494c-b758-3b559dbacdf6",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"x-ai/grok-4.3\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Find 2-3 strongest posts from the last 24 hours and create one exceptional Telegram post based on them. Be very efficient to save tokens. I want you to only search for exctly what's needed.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"make X_search.find all relevant post on {{ $('Get Channels details').item.json.content }}\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"openrouter:web_search\",\n      \"parameters\": {\n        \"max_results\": 8,\n        \"search_context_size\": \"medium\",\n        \"max_total_results\": 20\n      }\n    }\n  ],\n  \"tool_choice\": \"auto\",\n  \"temperature\": 0.7,\n  \"max_tokens\": 4096\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        -1024,
+        208
+      ],
+      "id": "cff85c0a-5105-431a-bad5-47acd0c22830",
+      "name": "X search tool",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "tBSSi2ymuHTuBpwM",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1952,
+        880
+      ],
+      "id": "556c6be5-4e42-48f3-809e-23af07609685",
+      "name": "Telegram Trigger",
+      "webhookId": "ee75cc43-51a8-4bbf-abc8-fefc2231e578",
+      "credentials": {
+        "telegramApi": {
+          "id": "eh0dSTqvmgRKz72z",
+          "name": "Telegram account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1952,
+        1152
+      ],
+      "id": "2657f423-47e2-4ca9-8af1-c91b4ed4189e",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "wAwJ2Mod1yTDAjh6",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -1664,
+        1152
+      ],
+      "id": "0e948569-3b44-4834-934c-16efe747bcf6",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1088,
+        880
+      ],
+      "id": "de29a89f-b439-4875-b866-c0b60e04c790",
+      "name": "Send a text message",
+      "webhookId": "f136d7c2-ff8b-439a-b004-832f273d4ce2",
+      "credentials": {
+        "telegramApi": {
+          "id": "eh0dSTqvmgRKz72z",
+          "name": "Telegram account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to view table or get rows\n\n\nColumns:\n- username: Telegram channel username (@channel)\n- chat_id: Telegram channel ID\n- content: channel topic or niche\n- content_style: writing style and tone\n- schedule: posting time in HH:MM format only\n\n",
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1867223924,
+          "mode": "list",
+          "cachedResultName": "channels",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0/edit#gid=1867223924"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -1280,
+        1136
+      ],
+      "id": "a30a281f-aa59-4d7f-ae38-c59e20ccc26b",
+      "name": "get rows for sheet Posts",
+      "credentials": {
+        "googleApi": {
+          "id": "olfC4XtKPvB22RKj",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to Append OR update rows if needed\n\n\nColumns:\n- username: Telegram channel username (@channel)\n- chat_id: Telegram channel ID\n- content: channel topic or niche(ALWAYS 1-2 words only \n- content_style: writing style and tone\n- schedule: posting time in HH:MM format only\n\n\n\nColumns:\n- username: Telegram channel username (@channel)\n- chat_id: Telegram channel ID\n- content: channel topic or niche\n- content_style: writing style and tone\n- schedule: posting time in HH:MM format only\n\nUse this tool carefully to avoid timeouts ",
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1867223924,
+          "mode": "list",
+          "cachedResultName": "channels",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TG_x-Fmuf6LQI706HrhB1WotccYCgjRM5qMmnleid-0/edit#gid=1867223924"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "username": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('username', ``, 'string') }}",
+            "chat_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('chat_id', ``, 'string') }}",
+            "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('content', ``, 'string') }}",
+            "content_style": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('content_style', ``, 'string') }}",
+            "shedule": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('shedule', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "username"
+          ],
+          "schema": [
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content_style",
+              "displayName": "content_style",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "shedule",
+              "displayName": "shedule",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -1104,
+        1136
+      ],
+      "id": "91aac50e-9c51-4899-b39b-e68b3fd124ae",
+      "name": "Append row for sheet Posts",
+      "credentials": {
+        "googleApi": {
+          "id": "olfC4XtKPvB22RKj",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Interact with Channels, create or change topic or descritption\n",
+        "height": 576,
+        "width": 1264
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        768
+      ],
+      "id": "e3b97e84-e78b-4a13-9ee1-931eef9bdc12",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "##Posting \n",
+        "height": 224,
+        "width": 1568,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2128,
+        464
+      ],
+      "typeVersion": 1,
+      "id": "1db5c810-8459-4ef8-bd8f-9caaab1d20ed",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You have sheet table managemet tools. you will need to get or add something if user asks. before using the tool carefully read it's description\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1600,
+        880
+      ],
+      "id": "7d67cf31-584e-4662-a6c6-45af25c5a23f",
+      "name": "Communicate to manage Posts"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Channel: {{ $json.username }}\nTopic: {{ $json.content }}\n\nCONTENT STYLE:\n\nChannel writing profile: \"{{ $json.content_style }}\"\n\nThis style influences:\n- vocabulary\n- sentence rhythm\n- aggressiveness\n- level of detail\n- framing of arguments\n\nKeep the style consistent throughout the post.\nDo not mention the style explicitly.\n\nWORKFLOW:\n1. Call the X search tool to find 2-3 relevant posts about \"{{ $json.content }}\" from the last 24 hours\n2. Read the results carefully\n3. Write ONE post. Before writing, decide: hook style, paragraph count, total length, angle — then commit to those choices and make the post feel natural, not templated\n\nDECIDE BEFORE WRITING:\n\nHook style — pick one randomly, never default to the same type:\n- Bold statement of a specific fact or number\n- Short question that stops the scroll\n- Cold open: drop the reader mid-thought, no setup\n- Unpopular take stated flatly\n- One-word or two-word opener followed by the context\n\nParagraph count — pick one randomly each time:\n- 2 paragraphs: tight, dense, fast\n- 3 paragraphs: hook + meat + closer\n- 4 paragraphs: longer build, more texture\n- 1 paragraph: single block, no breaks, rapid-fire\n\nPost length — pick one randomly:\n- Short: 300-380 characters\n- Medium: 420-520 characters\n- Long: 560-650 characters\n\nAngle — rotate, never repeat the previous:\n- Contrarian: challenge what everyone assumes\n- Data drop: one number that changes the read\n- Psychology: what traders feel vs what data says\n- Tactical: concrete positioning or timing signal\n- Macro: connect this to the bigger picture\n- Behavior: what the crowd is doing and why it backfires\n\nIRON RULES FOR STRUCTURE:\n\nAfter the hook line there is ALWAYS a blank line before the next paragraph. No exceptions.\n\nEvery paragraph is separated by one blank line.\n\nNever start two consecutive posts with the same hook style or same angle.\n\nVary sentence length inside each post: some sentences are 4 words. Some run longer with more texture and weight before landing the point.\n\nVOICE:\n- Confident, direct, sharp. Sounds like a trader who reads everything\n- Not hyped, not robotic, not cautious\n- No filler words, no padding\n\nHARD BANS:\n- Dashes of any kind: no — no – no -  between words\n- Hashtags\n- Words: massive, on fire, right now, heating up, killer, adrenaline, stay sharp, smart traders, shaking up, rewriting, playground, crucial, vital, game-changer, non-negligible\n- Raw URLs in the text body\n- Generic hooks that fit any topic\n- Ending every post with a call to action or \"watch X level\"\n\nHTML FORMATTING RULES:\n\nALLOWED TAGS — only these two:\n  Bold:  <b>text</b>\n  Link:  <a href=\"https://example.com\">label</a>\n\nRULES:\n  - Hook line is always bold: <b>hook text here</b>\n  - After the bold hook: one blank line, then first paragraph\n  - Bold only 1-2 key phrases per post maximum, never full paragraphs\n  - Never nest tags: no <b><a href=\"\">text</a></b>\n  - Never use: <i> <em> <strong> <br> <p> or any other tag\n  - Never use Markdown: no * _ ` # [ ]( )\n  - One blank line between paragraphs, never two\n  - Every opened tag must be closed\n\nVALID EXAMPLES — notice how different they look from each other:\n\nExample A (2 paragraphs, short, data angle):\n<b>28% odds on a US Bitcoin reserve before 2027.</b>\n\nPolymarket isn't noise. That probability is priced by people with money on the line. Crypto entering national policy is no longer a fringe scenario.\n\nExample B (4 paragraphs, long, psychology angle):\n<b>Everyone is certain BTC breaks higher from here.</b>\n\nThat certainty is the problem.\n\nX posts this week show 68% of new longs clustered near a level that becomes a stop-run target the moment volume dries up.\n\nThe herd sets its own trap. The squeeze comes when conviction is highest.\n\nExample C (1 block, medium, contrarian angle):\n<b>The narrative and the data are pointing in opposite directions.</b>\n\nSentiment reads bullish across every major CT account. But Polymarket odds on a resolution before Q3 just dropped 12 points in 48 hours. Markets price outcomes, not vibes. When those two diverge this hard, one of them corrects fast.\n\nNEVER MENTION SOURSE\n\nIN the end give a shot catchy line or just nothing. Catch line very variable.\n\nOUTPUT: Only the final post. No template label. No explanation. No JSON. Just the post.",
+        "options": {
+          "systemMessage": "You are an experienced crypto enthuthiast, who've recently started and results in wrighting are 50-50, but you still know alpha on a requested topic"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1184,
+        0
+      ],
+      "id": "96f4a52f-2fbe-4fb6-bd37-b5a893518993",
+      "name": "Lil Search Orchestrator"
+    },
+    {
+      "parameters": {
+        "content": "The Creator\n\nClreates conten for you every morning based on TOP X post on selected topic. Post are randomised\n\nTo set up:\n\nCreate a google sheet\n",
+        "height": 480,
+        "width": 1776,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2144,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "9170598d-8eea-4d86-9b3d-8c13182ef722",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Channels details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending Posts": {
+      "main": [
+        [
+          {
+            "node": "Time to Post?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Time to Post?": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Telegram": {
+      "main": [
+        [
+          {
+            "node": "Mark as Posted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Channels details": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Posted": {
+      "main": [
+        []
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Lil Search Orchestrator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Lil Search Orchestrator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Pending Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X search tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Lil Search Orchestrator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Communicate to manage Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Communicate to manage Posts",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Communicate to manage Posts",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get rows for sheet Posts": {
+      "ai_tool": [
+        [
+          {
+            "node": "Communicate to manage Posts",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row for sheet Posts": {
+      "ai_tool": [
+        [
+          {
+            "node": "Communicate to manage Posts",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Communicate to manage Posts": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lil Search Orchestrator": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Moscow",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "b4c42c12-fc28-4262-9ea7-0392f495d19f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b36c4891375d45774c874765305fbc8afb174d054722c75c4581ad7cc084987b"
+  },
+  "id": "CLP6ztsrBscBFKgl",
+  "tags": []
+}
