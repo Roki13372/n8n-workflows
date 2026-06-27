@@ -1,0 +1,244 @@
+{
+  "name": "Deduplication",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1nM0BJd2-CA5-fEWSCpMHvRKuZ_Ivob4Fv9QOczhKoxU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 125993367,
+          "mode": "list",
+          "cachedResultName": "последний поиск тг"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -528,
+        -528
+      ],
+      "id": "c0b34b4c-4e19-4858-91ae-bdd87c826176",
+      "name": "Get All Rows",
+      "credentials": {
+        "googleApi": {
+          "id": "olfC4XtKPvB22RKj",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst seen = new Map();\nconst toDelete = new Set();\n\nfor (const item of items) {\n  const postLink = (item.json['Post L:ink'] || '').trim();\n  const rowNum   = item.json['row_number'];\n\n  // Пропускаем пустые и N/A\n  if (!postLink || postLink === 'N/A') continue;\n\n  if (seen.has(postLink)) {\n    toDelete.add(rowNum);\n  } else {\n    seen.set(postLink, rowNum);\n  }\n}\n\nif (toDelete.size === 0) {\n  return [{ json: { _no_duplicates: true } }];\n}\n\nreturn [...toDelete]\n  .sort((a, b) => b - a)\n  .map(rowNum => ({ json: { row_number: rowNum } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -528
+      ],
+      "id": "edbda105-471b-4f3b-8ae9-65131aa1a7cb",
+      "name": "Find Duplicates"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "skip-no-dupes",
+              "leftValue": "={{ $json._no_duplicates }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        -528
+      ],
+      "id": "91c7c623-66db-4c32-b82d-f81096073570",
+      "name": "Skip if No Dupes"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        -416
+      ],
+      "id": "3dabe00a-181d-4afe-beab-ec417b0e440d",
+      "name": "Wait 1s",
+      "webhookId": "dedup-v4-wait-001"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        240,
+        -528
+      ],
+      "id": "ff425b2e-2935-4947-ba99-3c174b714556",
+      "name": "Loop Duplicates1"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1nM0BJd2-CA5-fEWSCpMHvRKuZ_Ivob4Fv9QOczhKoxU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 125993367,
+          "mode": "list",
+          "cachedResultName": "последний поиск тг"
+        },
+        "startIndex": "={{ $json.row_number }}"
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        704,
+        -416
+      ],
+      "id": "33587ab6-f7b2-4b67-8e51-96fe514fa9e3",
+      "name": "Delete Duplicate Row1",
+      "credentials": {
+        "googleApi": {
+          "id": "olfC4XtKPvB22RKj",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        -528
+      ],
+      "id": "88fab411-20db-4a4f-8fd6-4f927d62d4a7",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get All Rows": {
+      "main": [
+        [
+          {
+            "node": "Find Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Skip if No Dupes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip if No Dupes": {
+      "main": [
+        [
+          {
+            "node": "Loop Duplicates1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1s": {
+      "main": [
+        [
+          {
+            "node": "Delete Duplicate Row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Duplicates1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait 1s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Duplicate Row1": {
+      "main": [
+        [
+          {
+            "node": "Loop Duplicates1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get All Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e11aa2d1-8e86-4086-82df-591381bebc8b",
+  "meta": {
+    "instanceId": "b36c4891375d45774c874765305fbc8afb174d054722c75c4581ad7cc084987b"
+  },
+  "id": "Ikk0IxthxWlURGJM",
+  "tags": []
+}
