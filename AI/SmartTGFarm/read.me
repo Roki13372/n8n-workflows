@@ -1,0 +1,46 @@
+# Smart Telegram Poster (Multi-Channel & Multi-Bot)
+
+**Advanced autonomous Telegram content poster** with AI generation and multi-channel support.
+
+### Что делает workflow:
+- Автоматически **ищет тренды и сильные посты** в X (Twitter) по тематикам ваших каналов
+- Генерирует **уникальные качественные посты** с помощью Grok + OpenAI
+- Публикует их в **несколько Telegram-каналов** по расписанию
+- Поддерживает **разные боты** и разные стили написания для каждого канала
+- Ведёт учёт опубликованных постов (статус `pending` → `posted`)
+- Имеет **чат-бота** для управления каналами и постами в реальном времени
+
+### Основные возможности:
+- Много-канальная публикация
+- Умный AI-контент (Grok-4 + GPT-4.1-mini)
+- Поиск трендов через OpenRouter + web search
+- Гибкое расписание для каждого канала
+- Автоматическое обновление статуса в Google Sheets
+- Чат-управление каналами (добавление, изменение тематики, стиля и расписания)
+
+### Структура Google Sheets:
+
+**Лист 1 — Posts**
+- Post Text
+- Publish At
+- Status (`pending` / `posted`)
+- Channel ID
+- ... (другие поля)
+
+**Лист 2 — Channels**
+- username
+- chat_id
+- content (тематика)
+- content_style (стиль написания)
+- shedule (время публикации, например `08:00`)
+
+### Как использовать:
+1. Настрой credentials (Google Sheets + Telegram Bots + OpenAI/OpenRouter)
+2. Заполни лист `Channels`
+3. Запусти workflow
+4. Для ручного управления — пиши боту в Telegram
+
+**Теги:** telegram, auto-posting, ai-content, multi-channel, grok, twitter-search, automation
+
+---
+*Один из самых продвинутых Telegram-постеров на n8n*
